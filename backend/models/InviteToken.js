@@ -4,7 +4,7 @@ const inviteTokenSchema = new mongoose.Schema({
   form: { type: mongoose.Schema.Types.ObjectId, ref: "Form", required: true },
   token: { type: String, required: true, unique: true },
   used: { type: Boolean, default: false },
-  expiresAt: Date,
+  expiresAt: { type: Date, required: true },
   createdAt: { type: Date, default: Date.now },
 });
 
