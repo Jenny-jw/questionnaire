@@ -2,7 +2,11 @@ import mongoose from "mongoose";
 
 const filedSchema = new mongoose.Schema({
   question: { type: String, required: true },
-  type: { type: String, enum: ["text", "checkbox"], required: true },
+  type: {
+    type: String,
+    enum: ["shortAnswer", "paragraph", "multipleChoice", "checkboxes", "date"],
+    required: true,
+  },
   options: [String],
   required: { type: Boolean, default: false },
 });
