@@ -15,6 +15,8 @@ const router = express.Router();
 // 1. POST /api/forms, create a form
 router.post("/", async (req, res) => {
   try {
+    console.log("In POST, req.body: ");
+    console.log(req.body);
     const {
       title,
       description,
@@ -30,14 +32,22 @@ router.post("/", async (req, res) => {
     const tokenExpireAt = new Date(jwt.decode(adminToken).exp * 1000); // exp is UNIX timestamp (second), * 1000 to become JS Date (millisecond)
 
     // TODO: bcrypt.hash(adminToken)
+    const dbField = fields.map((f) => ({
+      question: f.question ?? "",
+      type: f.type ?? "",
+      options: Array.isArray(f.options) ? f.options : [],
+      required: !!f.required,
+    }));
+
+    const ownerTokenHash = "1234567";
 
     const newForm = new Form({
       title,
       description,
-      fields,
-      owner,
+      fields: dbField,
+      owner: owner || undefined,
       ownerEmail, // When token lost, email-based recovery
-      // ownerTokenHash, // When token lost, email-based recovery
+      ownerTokenHash, // When token lost, email-based recovery
       ownerTokenExpireAt: tokenExpireAt,
       requireLogin,
       allowAnonymous,
@@ -52,6 +62,7 @@ router.post("/", async (req, res) => {
       questionnaireLink: `https://myApp-on-render.com/forms/${savedForm._id}`,
     });
   } catch (err) {
+    console.error("Error creating form:", err);
     res
       .status(500)
       .json({ error: "Fail to create a form", detail: err.message });
