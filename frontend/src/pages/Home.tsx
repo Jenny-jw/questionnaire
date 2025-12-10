@@ -5,6 +5,7 @@ const Home = () => {
   return (
     <>
       <h1>Create your own forms~ 🪼</h1>
+      <br />
       <button
         onClick={() => {
           navigate("/formBuilder");
