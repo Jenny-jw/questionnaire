@@ -12,16 +12,17 @@ const fieldSchema = new mongoose.Schema({
 });
 
 const formSchema = new mongoose.Schema({
-  title: { type: String, required: true },
+  title: { type: String },
   description: { type: String },
   fields: [fieldSchema],
   requireLogin: { type: Boolean, default: false },
-  allowAnonymous: { type: Boolean, default: false },
+  allowAnonymous: { type: Boolean, default: true },
+  creator: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Creator",
+    required: true,
+  },
   createdAt: { type: Date, default: Date.now },
-  owner: { type: mongoose.Schema.Types.ObjectId, ref: "Creator" },
-  ownerEmail: { type: String },
-  ownerTokenHash: { type: String },
-  ownerTokenExpireAt: { type: Date },
 });
 
 export default mongoose.model("Form", formSchema);

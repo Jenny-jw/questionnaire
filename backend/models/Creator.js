@@ -2,10 +2,9 @@ import mongoose from "mongoose";
 
 // Just for form creator
 const creatorSchema = new mongoose.Schema({
-  name: { type: String },
   email: { type: String, unique: true, sparse: true },
-  passwordHash: { type: String },
-  role: { type: String, enum: ["creator", "user"], default: "creator" },
+  tokenHash: { type: String },
+  tokenExpireAt: { type: Date },
   createdAt: { type: Date, default: Date.now },
 });
 
