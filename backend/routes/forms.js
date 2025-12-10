@@ -2,10 +2,12 @@ import express from "express";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import Form from "../models/Form.js";
-import InviteToken from "../models/InviteToken.js";
+import Creator from "../models/Creator.js";
 import Response from "../models/Response.js";
-import crypto from "crypto";
+import transporter from "../config/nodemailer.js";
+import crypto, { hash } from "crypto";
 import mongoose from "mongoose";
+import bcrypt from "bcrypt";
 
 dotenv.config();
 
@@ -15,51 +17,81 @@ const router = express.Router();
 // 1. POST /api/forms, create a form
 router.post("/", async (req, res) => {
   try {
-    console.log("In POST, req.body: ");
-    console.log(req.body);
-    const {
-      title,
-      description,
-      fields,
-      owner,
-      ownerEmail,
-      requireLogin,
-      allowAnonymous,
-    } = req.body;
-    const adminToken = jwt.sign({ owner, ownerEmail }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
+    const { title, description, fields, email, requireLogin, allowAnonymous } =
+      req.body;
+
+    if (!email) return res.status(400).json({ error: "Email is required" });
+
+    // Find or create a creator
+    let creator = await Creator.findOne({ email });
+    if (!creator) creator = await Creator.create({ email });
+
+    // Generate admin token
+    const adminToken = jwt.sign(
+      { creatorId: creator._id },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d",
+      }
+    );
     const tokenExpireAt = new Date(jwt.decode(adminToken).exp * 1000); // exp is UNIX timestamp (second), * 1000 to become JS Date (millisecond)
 
-    // TODO: bcrypt.hash(adminToken)
-    const dbField = fields.map((f) => ({
+    // Hash token
+    const tokenHash = await bcrypt.hash(adminToken, 10);
+
+    creator.tokenHash = tokenHash;
+    creator.tokenExpireAt = tokenExpireAt;
+    await creator.save();
+
+    // Sanitize fields
+    const sanitizedFields = fields.map((f) => ({
       question: f.question ?? "",
       type: f.type ?? "",
       options: Array.isArray(f.options) ? f.options : [],
       required: !!f.required,
     }));
 
-    const ownerTokenHash = "1234567";
-
+    // Create and save form
     const newForm = new Form({
       title,
       description,
-      fields: dbField,
-      owner: owner || undefined,
-      ownerEmail, // When token lost, email-based recovery
-      ownerTokenHash, // When token lost, email-based recovery
-      ownerTokenExpireAt: tokenExpireAt,
+      fields: sanitizedFields,
+      creator: creator._id,
       requireLogin,
       allowAnonymous,
     });
     const savedForm = await newForm.save();
-    // Nodemailer: 用 email 把 token 寄給 admin（只存到信箱，不回傳前端）
-    res.status(201).json({
+
+    // Send mailgun email with nodemailer
+    // await transporter.sendMail({
+    //   from: `Your App <${process.env.GMAIL_USER}>`,
+    //   to: email,
+    //   subject: "Your Admin Token",
+    //   html: `
+    //     <p>Your form has been created successfully.</p>
+    //     <p><strong>Form ID:</strong> ${savedForm._id}</p>
+    //     <p><strong>Admin Token (keep this safe for 7 days):</strong></p>
+    //     <pre>${adminToken}</pre>
+    //     <p>You can manage your form here:</p>
+    //     <a href="${process.env.APP_URL}/admin/forms/${savedForm._id}">
+    //       ${process.env.APP_URL}/admin/forms/${savedForm._id}
+    //     </a>
+    //   `,
+    // });
+
+    // Store adminToken in HttpOnly token
+    res.cookie("adminToken", adminToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+    // Return results
+    return res.status(201).json({
       message:
-        "Successfully created a form. Please save your token. The token will be expired in 7 days.",
-      adminToken: adminToken,
+        "Successfully created a form. Please check your email and save your token. The token will be expired in 7 days.",
       formId: savedForm._id,
-      questionnaireLink: `https://myApp-on-render.com/forms/${savedForm._id}`,
+      questionnaireLink: `${process.env.APP_URL}/forms/${savedForm._id}`,
     });
   } catch (err) {
     console.error("Error creating form:", err);
@@ -91,15 +123,14 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-// GET /api/forms/:formId/responses, get all responses of a form
 // GET /api/forms/:formId/responses/:responseId, get a response of a form
 // DELETE /api/forms/:formId/responses/:responseId, delete a response of a form
 
 /* APIs for Fillers */
 // 流程: fillers拿到帶 token 的填答連結，例如 https://yourapp.com/forms/:formId/respond?token=abcdef123456
 
-// 2. GET GET /api/forms/:formId, create an inviteToken when a filler open the questionnaire
-router.get("/:id/invite", async (req, res) => {
+// 2. GET /api/forms/:formId, create an inviteToken when a filler open the questionnaire
+router.get("/:formId/invite", async (req, res) => {
   try {
     // create a token (crypto vs uuid)，存進 DB → InviteToken Schema (form, token, used, expiresAt)
     const relatedForm = await Form.findById(req.params.id);
@@ -121,7 +152,33 @@ router.get("/:id/invite", async (req, res) => {
   }
 });
 
-// 3. POST /api/forms/:formId/responses, add response, remove inviteToken
+// 3. GET /api/admin/forms/:formId/responses, used by form creator to manage forms
+router.get("/admin/:formId/responses", async (req, res) => {
+  try {
+    const { adminToken } = req.cookies;
+    if (!adminToken)
+      return res.status(401).json({ message: "No admin token provided" });
+
+    const form = await Form.findById(req.params.id);
+    if (!form) return res.status(404).json({ message: "Form not found" });
+    if (form.ownerTokenHash !== hash(adminToken))
+      return res.status(403).json({ message: "Invalid admin token" });
+
+    res.json({
+      message: "Welcome :)",
+      formId: form._id,
+      title: form.title,
+      description: form.description,
+      fields: form.fields,
+    });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ error: "Fail to calidate admin token", detail: err.message });
+  }
+});
+
+// 4. POST /api/forms/:formId/responses, add response, remove inviteToken
 // 填答者打開時，前端會帶 token，後端驗證token是否存在？過期？已被使用？通過驗證後，才允許填答並建立 Response
 router.post("/:id/response", async (req, res) => {
   const session = await mongoose.startSession();
