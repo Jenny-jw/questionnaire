@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
 import QuestionBox, {
@@ -16,6 +17,7 @@ const FormBuilder = () => {
   const [owner, setOwner] = useState("");
   const [ownerEmail, setOwnerEmail] = useState("");
   const [showOptions, setShowOptions] = useState(false);
+  const navigate = useNavigate();
 
   interface QuestionOption {
     type: QuestionType;
@@ -63,21 +65,32 @@ const FormBuilder = () => {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const ownerTokenHash = "123";
-    const ownerTokenExpireAt = new Date();
     try {
-      await axios.post("/api/forms", {
+      const res = await axios.post("/api/forms", {
         title,
         description,
         fields,
         requireLogin,
         allowAnonymous,
-        owner,
-        ownerEmail,
-        ownerTokenHash,
-        ownerTokenExpireAt,
+        email: ownerEmail,
       });
       console.log("Form created! 🌿");
+
+      const { adminToken, formId, questionnaireLink, message } = res.data;
+
+      setTitle("");
+      setDescription("");
+      setFields([]);
+      setRequireLogin(false);
+      setAllowAnonymous(false);
+      setOwner("");
+      setOwnerEmail("");
+      console.log("Form ID is: ", formId);
+      console.log("Admin token is: ", adminToken);
+      console.log("questionnaireLink is: ", questionnaireLink);
+      console.log("Message from the response is: ", message);
+
+      navigate(`/formCreated/${res.data.formId}`);
     } catch (err) {
       console.log(err);
     }
