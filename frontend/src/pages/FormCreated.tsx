@@ -1,28 +1,20 @@
 import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
-import axios from "axios";
 
 const FormCreated = () => {
   const { formId } = useParams();
-  const [message, setMessage] = useState("");
-
-  useEffect(() => {
-    axios
-      .get(`/api/forms/${formId}/responses`, { withCredentials: true })
-      .then((res) => setMessage(res.data.message))
-      .catch((err) => setMessage("Expired token"));
-  }, [formId]);
+  const APP_URL = import.meta.env.VITE_APP_URL;
 
   return (
     <>
       <h1>Form created successfully 🎉</h1>
       <br />
-      <p>URL of the form you created:</p>
+      <p>
+        Form URL: {APP_URL}/forms/{formId}
+      </p>
+      <button>Copy URL</button>
+      <button>Open the form</button>
       {/* formId（公開） → 用來填寫 UI、分享 URL */}
       {/* adminToken（秘密） → 用於管理表單 */}
-      <p>Form ID: {formId}</p>
-      <p>{message}</p>
-      {/* <p>Your creator token is: {ownerTokenHash}</p> */}
     </>
   );
 };

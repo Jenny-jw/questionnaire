@@ -66,7 +66,7 @@ const FormBuilder = () => {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
-      const res = await axios.post("/api/forms", {
+      const res = await axios.post("/api/admin/forms", {
         title,
         description,
         fields,
@@ -76,7 +76,7 @@ const FormBuilder = () => {
       });
       console.log("Form created! 🌿");
 
-      const { adminToken, formId, questionnaireLink, message } = res.data;
+      const { formId, questionnaireLink, message } = res.data;
 
       setTitle("");
       setDescription("");
@@ -86,7 +86,6 @@ const FormBuilder = () => {
       setOwner("");
       setOwnerEmail("");
       console.log("Form ID is: ", formId);
-      console.log("Admin token is: ", adminToken);
       console.log("questionnaireLink is: ", questionnaireLink);
       console.log("Message from the response is: ", message);
 
