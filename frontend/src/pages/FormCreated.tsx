@@ -1,8 +1,14 @@
-import { useParams } from "react-router-dom";
+import type React from "react";
+import { useParams, useNavigate } from "react-router-dom";
 
 const FormCreated = () => {
   const { formId } = useParams();
   const APP_URL = import.meta.env.VITE_APP_URL;
+  const navigate = useNavigate();
+
+  const handleSubmit = () => {
+    navigate(`/forms/${formId}`);
+  };
 
   return (
     <>
@@ -12,7 +18,7 @@ const FormCreated = () => {
         Form URL: {APP_URL}/forms/{formId}
       </p>
       <button>Copy URL</button>
-      <button>Open the form</button>
+      <button onClick={handleSubmit}>Open the form</button>
       {/* formId（公開） → 用來填寫 UI、分享 URL */}
       {/* adminToken（秘密） → 用於管理表單 */}
     </>
