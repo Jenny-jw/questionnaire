@@ -5,7 +5,7 @@ import Form from "../models/Form.js";
 import Creator from "../models/Creator.js";
 import InviteToken from "../models/InviteToken.js";
 import bcrypt from "bcrypt";
-import InviteToken from "../models/InviteToken.js";
+import adminAuth from "../middleware/adminAuth.js";
 
 dotenv.config();
 
@@ -104,6 +104,7 @@ router.post("/", async (req, res) => {
   }
 });
 
+// POST /api/admin/forms/:formId/invite, create a token for a filler
 router.post("/:formId/invite", adminAuth, async (req, res) => {
   try {
     // Check if form exists
