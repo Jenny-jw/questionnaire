@@ -12,28 +12,20 @@ dotenv.config();
 const router = express.Router();
 
 // PUBLIC app.use("/api/forms", formsRouter);
-// X | GET  /api/forms/:formId
+// DONE | GET  /api/forms/:formId
 // X | GET  /api/forms/:formId?token=xxx
 // X | POST /api/forms/:formId
 
 // GET /api/forms/:formId, access questionnaire
-router.get("/forms/:formId", async (req, res) => {
+router.get("/:formId", async (req, res) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.formId)) {
+    return res.status(400).json({ error: "Invalid formId" });
+  }
+
   try {
-    // create a token (crypto vs uuid)，存進 DB → InviteToken Schema (form, token, used, expiresAt)
-    const relatedForm = await Form.findById(req.params.formId);
-    const inviteToken = crypto.randomBytes(16).toString("hex");
-    const expTime = 24 * 60 * 60 * 1000; // ms in a day
-    // const newInviteToken = new InviteToken({
-    //   form: relatedForm,
-    //   token: inviteToken,
-    //   used: false,
-    //   expiresAt: new Date(Date.now() + expTime),
-    // });
-    // await newInviteToken.save();
-    res.status(201).json({
-      message: "The questionnaire will be expired in one day.",
-      otp: inviteToken,
-    });
+    const form = await Form.findById(req.params.formId);
+    if (!form) return res.status(404).json({ error: "Form not found." });
+    res.status(200).json(form);
   } catch (err) {
     res.status(500).json({ error: "Fail to ", detail: err.message });
   }
