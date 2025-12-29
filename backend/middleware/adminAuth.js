@@ -1,14 +1,14 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import Creator from "../models/Creator";
+import Creator from "../models/Creator.js";
 import bcrypt from "bcrypt";
-import Form from "../models/Form";
+import Form from "../models/Form.js";
 
 dotenv.config();
 
 const adminAuth = async (req, res, next) => {
   try {
-    // Get toke from cookie
+    // Get token from cookie
     const token = req.cookie?.adminToken;
     if (!token) return res.status(401).json({ message: "Admin token found" });
 
