@@ -4,6 +4,7 @@ import Home from "./pages/Home.tsx";
 import FormBuilder from "./pages/FormBuilder.tsx";
 import FormCreated from "./pages/FormCreated.tsx";
 import FillerForm from "./pages/FillerForm.tsx";
+import FormPreview from "./pages/FormPreview.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
         <Route path="/formBuilder" element={<FormBuilder />} />
         <Route path="/formCreated/:formId" element={<FormCreated />} />
         <Route path="/forms/:formId" element={<FillerForm />} />
+        <Route path="/formPreview/:formId" element={<FormPreview />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </main>
