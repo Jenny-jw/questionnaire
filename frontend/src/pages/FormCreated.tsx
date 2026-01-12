@@ -9,6 +9,9 @@ const FormCreated = () => {
   const handleSubmit = () => {
     navigate(`/forms/${formId}`);
   };
+  const handlePreview = () => {
+    navigate(`/formPreview/${formId}`);
+  };
 
   return (
     <>
@@ -17,8 +20,8 @@ const FormCreated = () => {
       <p>
         Form URL: {APP_URL}/forms/{formId}
       </p>
-      <button>Copy URL</button>
-      <button onClick={handleSubmit}>Open the form</button>
+      <button onClick={handlePreview}>Preview form created</button>
+      <button onClick={handleSubmit}>Create and copy invite link</button>
       {/* formId（公開） → 用來填寫 UI、分享 URL */}
       {/* adminToken（秘密） → 用於管理表單 */}
     </>
