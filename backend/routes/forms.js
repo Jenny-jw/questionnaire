@@ -33,7 +33,7 @@ router.get("/:formId", async (req, res) => {
 
 // ?? POST /api/forms/:formId/responses, add response, remove inviteToken
 // 填答者打開時，前端會帶 token，後端驗證token是否存在？過期？已被使用？通過驗證後，才允許填答並建立 Response
-router.post("/:id/response", async (req, res) => {
+router.post("/:formId", async (req, res) => {
   const session = await mongoose.startSession();
   try {
     // Make sure saveResponse and updateToken and done / fail together
