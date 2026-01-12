@@ -8,4 +8,6 @@ const responseSchema = new mongoose.Schema({
   submittedAt: { type: Date, default: Date.now },
 });
 
+responseSchema.index({ form: 1, inviteToken: 1 }, { unique: true });
+
 export default mongoose.model("Response", responseSchema);
