@@ -6,11 +6,11 @@ const FormCreated = () => {
   const APP_URL = import.meta.env.VITE_APP_URL;
   const navigate = useNavigate();
 
-  const handleSubmit = () => {
-    navigate(`/forms/${formId}`);
-  };
   const handlePreview = () => {
     navigate(`/formPreview/${formId}`);
+  };
+  const handleSubmit = () => {
+    navigate(`/forms/${formId}`);
   };
 
   return (
