@@ -29,8 +29,7 @@ const FormPreview = () => {
   const [form, setForm] = useState<Form | null>(null);
 
   useEffect(() => {
-    axios.get(`/api/forms/${formId}`).then((res) => {
-      console.log("form API response:", res.data);
+    axios.get(`/api/admin/forms/${formId}`).then((res) => {
       setForm(res.data);
     });
   }, [formId]);
