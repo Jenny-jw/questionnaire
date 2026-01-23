@@ -12,12 +12,11 @@ dotenv.config();
 const router = express.Router();
 
 // PUBLIC app.use("/api/forms", formsRouter);
-// DONE | GET  /api/forms/:formId
 // X | GET  /api/forms/:formId?token=xxx
 // X | POST /api/forms/:formId
 
-// GET /api/forms/:formId, access questionnaire
-router.get("/:formId", async (req, res) => {
+// GET /api/forms/:formId/:inviteToken, access questionnaire with inviteToken
+router.get("/:formId/:inviteToken", async (req, res) => {
   if (!mongoose.Types.ObjectId.isValid(req.params.formId)) {
     return res.status(400).json({ error: "Invalid formId" });
   }
@@ -31,8 +30,7 @@ router.get("/:formId", async (req, res) => {
   }
 });
 
-// ?? POST /api/forms/:formId/responses, add response, remove inviteToken
-// 填答者打開時，前端會帶 token，後端驗證token是否存在？過期？已被使用？通過驗證後，才允許填答並建立 Response
+// POST /api/forms/:formId/responses, add response, remove inviteToken
 router.post("/:formId", async (req, res) => {
   const session = await mongoose.startSession();
   try {
@@ -67,8 +65,6 @@ router.post("/:formId", async (req, res) => {
     session.endSession();
   }
 });
-// GET /api/forms/:id/respond?token=xxxx → 驗證 token 有效 → 回傳表單內容。
-// POST /api/forms/:id/respond → 儲存答案，同時將 token 標記為已用。
 
 const formsRouter = router;
 export default formsRouter;
