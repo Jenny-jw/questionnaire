@@ -14,8 +14,8 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/formBuilder" element={<FormBuilder />} />
         <Route path="/formCreated/:formId" element={<FormCreated />} />
-        <Route path="/forms/:formId" element={<FillerForm />} />
         <Route path="/formPreview/:formId" element={<FormPreview />} />
+        <Route path="/fill/:formId/:inviteToken" element={<FillerForm />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </main>
