@@ -6,16 +6,33 @@ import Creator from "../models/Creator.js";
 import InviteToken from "../models/InviteToken.js";
 import bcrypt from "bcrypt";
 import adminAuth from "../middleware/adminAuth.js";
+import mongoose from "mongoose";
 
 dotenv.config();
 
 const router = express.Router();
 // ADMIN app.use("/api/admin/forms", formAdminsRouter);
+// DONE | GET /api/admin/forms/:formId, preview questionnaire
 // DONE | POST  /api/admin/forms
 // X | POST  /api/admin/forms/:formId/invite
 // X | GET  /api/admin/forms/:formId, read results
 // X | PATCH  /api/admin/forms/:formId
 // X | DELETE /api/admin/forms/:formId
+
+// GET /api/admin/forms/:formId, preview questionnaire
+router.get("/:formId", async (req, res) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.formId)) {
+    return res.status(400).json({ error: "Invalid formId" });
+  }
+
+  try {
+    const form = await Form.findById(req.params.formId);
+    if (!form) return res.status(404).json({ error: "Form not found." });
+    res.status(200).json(form);
+  } catch (err) {
+    res.status(500).json({ error: "Fail to ", detail: err.message });
+  }
+});
 
 // POST /api/admin/forms, create a form
 router.post("/", async (req, res) => {
@@ -35,7 +52,7 @@ router.post("/", async (req, res) => {
       process.env.JWT_SECRET,
       {
         expiresIn: "7d",
-      }
+      },
     );
     const tokenExpireAt = new Date(jwt.decode(adminToken).exp * 1000); // exp is UNIX timestamp (second), * 1000 to become JS Date (millisecond)
 
