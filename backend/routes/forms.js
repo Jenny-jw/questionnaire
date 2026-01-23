@@ -2,10 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import Form from "../models/Form.js";
 import Response from "../models/Response.js";
-import transporter from "../config/nodemailer.js";
-import crypto, { hash } from "crypto";
 import mongoose from "mongoose";
-import bcrypt from "bcrypt";
 
 dotenv.config();
 
