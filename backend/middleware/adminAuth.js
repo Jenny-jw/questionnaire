@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import Creator from "../models/Creator.js";
 import bcrypt from "bcrypt";
+import Creator from "../models/Creator.js";
 import Form from "../models/Form.js";
 
 dotenv.config();
@@ -9,7 +9,7 @@ dotenv.config();
 const adminAuth = async (req, res, next) => {
   try {
     // Get token from cookie
-    const token = req.cookie?.adminToken;
+    const token = req.cookies?.adminToken;
     if (!token) return res.status(401).json({ message: "Admin token found" });
 
     // Verify JWT
