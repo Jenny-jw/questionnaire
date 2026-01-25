@@ -3,17 +3,18 @@ import dotenv from "dotenv";
 import Form from "../models/Form.js";
 import Response from "../models/Response.js";
 import mongoose from "mongoose";
+import InviteToken from "../models/InviteToken.js";
 
 dotenv.config();
 
 const router = express.Router();
 
 // PUBLIC app.use("/api/forms", formsRouter);
-// X | GET  /api/forms/:formId?token=xxx
+// DONE | GET  /api/forms/:formId?token=xxx
 // X | POST /api/forms/:formId
 
-// GET /api/forms/:formId/:inviteToken, access questionnaire with inviteToken
-router.get("/:formId/:inviteToken", async (req, res) => {
+// GET /api/forms/:formId?token=xxx, access questionnaire with inviteToken
+router.get("/:formId", async (req, res) => {
   if (!mongoose.Types.ObjectId.isValid(req.params.formId)) {
     return res.status(400).json({ error: "Invalid formId" });
   }
@@ -21,6 +22,15 @@ router.get("/:formId/:inviteToken", async (req, res) => {
   try {
     const form = await Form.findById(req.params.formId);
     if (!form) return res.status(404).json({ error: "Form not found." });
+
+    const { formId } = req.params;
+    const { token } = req.query;
+    const invite = await InviteToken.findOne({
+      form: formId,
+      inviteToken: token,
+    });
+    if (!invite) return res.status(403).json({ error: "Invalid token" });
+
     res.status(200).json(form);
   } catch (err) {
     res.status(500).json({ error: "Fail to ", detail: err.message });
@@ -36,7 +46,7 @@ router.post("/:formId", async (req, res) => {
       const relatedForm = await Form.findById(req.params.id);
       const { inviteToken, answers } = req.body;
       const tokenInDb = await InviteToken.findOne({
-        token: inviteToken,
+        inviteToken,
       }).session(session);
 
       if (!tokenInDb) throw new Error("Invalid invite token");
