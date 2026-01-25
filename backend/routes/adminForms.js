@@ -1,6 +1,7 @@
 import express from "express";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import crypto from "crypto";
 import Form from "../models/Form.js";
 import Creator from "../models/Creator.js";
 import InviteToken from "../models/InviteToken.js";
@@ -14,7 +15,7 @@ const router = express.Router();
 // ADMIN app.use("/api/admin/forms", formAdminsRouter);
 // DONE | POST  /api/admin/forms, create a form
 // DONE | GET /api/admin/forms/:formId, preview questionnaire
-// X | POST  /api/admin/forms/:formId/invite
+// DONE | POST  /api/admin/forms/:formId/invite
 // X | GET  /api/admin/forms/:formId, read results
 // X | PATCH  /api/admin/forms/:formId
 // X | DELETE /api/admin/forms/:formId
@@ -133,17 +134,17 @@ router.post("/:formId/invite", adminAuth, async (req, res) => {
     const token = crypto.randomBytes(32).toString("hex");
     const expTime = 7 * 24 * 60 * 60 * 1000; // ms in 7 day
     const expiresAt = new Date(Date.now() + expTime);
-    const newInviteToken = new InviteToken({
+    const newInviteToken = await InviteToken.create({
       form: form._id,
-      token,
+      inviteToken: token,
       expiresAt,
     });
-    await newInviteToken.save();
 
     // Return link for sharing
-    const inviteURL = `${process.env.APP_URL}/form/${formId}?token=${token}`;
+    const inviteURL = `${process.env.APP_URL}/forms/${formId}?token=${token}`;
 
     res.status(201).json({
+      inviteToken: token,
       inviteURL,
       expiresAt,
     });
