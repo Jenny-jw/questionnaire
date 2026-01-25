@@ -55,7 +55,7 @@ const FormBuilder = () => {
 
   const updateQuestion = (id: string, updated: Partial<Question>) => {
     setFields((prev) =>
-      prev.map((q) => (q.id === id ? { ...q, ...updated } : q))
+      prev.map((q) => (q.id === id ? { ...q, ...updated } : q)),
     );
   };
 
@@ -76,8 +76,6 @@ const FormBuilder = () => {
       });
       console.log("Form created! 🌿");
 
-      const { formId, questionnaireLink, message } = res.data;
-
       setTitle("");
       setDescription("");
       setFields([]);
@@ -85,9 +83,6 @@ const FormBuilder = () => {
       setAllowAnonymous(false);
       setOwner("");
       setOwnerEmail("");
-      console.log("Form ID is: ", formId);
-      console.log("questionnaireLink is: ", questionnaireLink);
-      console.log("Message from the response is: ", message);
 
       navigate(`/formCreated/${res.data.formId}`);
     } catch (err) {
