@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useEffect, useState, React } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 
 type FieldType =
   | "shortAnswer"
@@ -31,7 +31,8 @@ type Answers = {
 const FillerForm = () => {
   const { formId } = useParams();
   const [form, setForm] = useState<Form | null>(null);
-  // const token = new URLSearchParams(location.search).get("token");
+  const location = useLocation();
+  const inviteToken = new URLSearchParams(location.search).get("token");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -65,6 +66,7 @@ const FillerForm = () => {
     try {
       await axios.post(`/api/forms/${formId}`, {
         form: formId,
+        inviteToken,
         answers,
         isAnonymous: true,
       });
@@ -75,12 +77,19 @@ const FillerForm = () => {
     }
   };
 
+  // Need to change into /api/forms/${formId}/${inviteToken}
   useEffect(() => {
-    axios.get(`/api/forms/${formId}`).then((res) => {
-      console.log("form API response:", res.data);
-      setForm(res.data);
-    });
-  }, [formId]);
+    if (!formId || !inviteToken) return;
+    axios
+      .get(`/api/forms/${formId}?token=${inviteToken}`)
+      .then((res) => {
+        setForm(res.data);
+      })
+      .catch(() => {
+        alert("Invalid invite link");
+        console.log("inviteToken: ", inviteToken);
+      });
+  }, [formId, inviteToken]);
 
   if (!form) return <div>Form is loading~</div>;
 
