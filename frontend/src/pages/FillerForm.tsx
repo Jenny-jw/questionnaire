@@ -77,7 +77,6 @@ const FillerForm = () => {
     }
   };
 
-  // Need to change into /api/forms/${formId}/${inviteToken}
   useEffect(() => {
     if (!formId || !inviteToken) return;
     axios
