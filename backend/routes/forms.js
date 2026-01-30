@@ -11,7 +11,7 @@ const router = express.Router();
 
 // PUBLIC app.use("/api/forms", formsRouter);
 // DONE | GET  /api/forms/:formId?token=xxx
-// X | POST /api/forms/:formId
+// DONE | POST /api/forms/:formId
 
 // GET /api/forms/:formId?token=xxx, access questionnaire with inviteToken
 router.get("/:formId", async (req, res) => {
@@ -37,34 +37,49 @@ router.get("/:formId", async (req, res) => {
   }
 });
 
-// POST /api/forms/:formId/responses, add response, remove inviteToken
+// POST /api/forms/:formId, add response, remove inviteToken
 router.post("/:formId", async (req, res) => {
   const session = await mongoose.startSession();
+
   try {
     // Make sure saveResponse and updateToken and done / fail together
     await session.withTransaction(async () => {
-      const relatedForm = await Form.findById(req.params.id);
+      const { formId } = req.params;
       const { inviteToken, answers } = req.body;
-      const tokenInDb = await InviteToken.findOne({
-        inviteToken,
-      }).session(session);
 
-      if (!tokenInDb) throw new Error("Invalid invite token");
-      if (tokenInDb.used) throw new Error("Token is alreadt used");
-      if (tokenInDb.expiresAt < new Date())
-        return res.status(400).json({ error: "Token is expired" });
+      const form = await Form.findById(formId).session(session);
+      if (!form) throw new Error("Form not found");
 
-      const newResponse = new Response({
-        relatedForm,
-        answers,
-        token: inviteToken,
-      });
-      await newResponse.save({ session });
+      const token = await InviteToken.findOne({ InviteToken }).session(session);
+      if (!token) throw new Error("Token not found");
+      if (token.expiresAt < new Date()) throw new Error("Token expired");
 
-      tokenInDb.used = true;
-      await tokenInDb.save({ session });
-
+      await Response.findOneAndUpdate(
+        { inviteToken },
+        { formId, answers },
+        { upsert: true, new: true, session },
+      );
       res.json({ success: true });
+
+      // const relatedForm = await Form.findById(req.params.formId);
+      // const { inviteToken, answers } = req.body;
+      // const tokenInDb = await InviteToken.findOne({
+      //   inviteToken,
+      // }).session(session);
+
+      // if (!tokenInDb) throw new Error("Invalid invite token");
+      // if (tokenInDb.used) throw new Error("Token is alreadt used");
+      // if (tokenInDb.expiresAt < new Date()) throw new Error("Token expired");
+
+      // const response = new Response({
+      //   relatedForm,
+      //   answers,
+      //   token: inviteToken,
+      // });
+      // await response.save({ session });
+      // await tokenInDb.save({ session });
+
+      // res.json({ success: true });
     });
   } catch (err) {
     res.status(400).json({ error: err.message });
