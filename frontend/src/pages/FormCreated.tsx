@@ -38,28 +38,34 @@ const FormCreated = () => {
   };
 
   return (
-    <>
-      <h1>Form created successfully 🎉</h1>
-      <br />
+    <div className="flex flex-col gap-6">
+      <h1>Form created successfully🎄</h1>
       <p>
-        Form URL: {APP_URL}/forms/{formId}
+        <strong>Form URL: </strong>
+        <code>
+          {APP_URL}/forms/{formId}
+        </code>
       </p>
-      <button onClick={handlePreview}>Preview form created</button>
-      <button onClick={handleGenerate}>Generate invite link</button>
+      <div className="flex gap-4 justify-center">
+        <button onClick={handlePreview}>Preview form created</button>
+        <button onClick={handleGenerate}>Generate invite link</button>
+      </div>
       {status && <p>{status}</p>}
       {inviteURL && (
-        <div className="mt-4">
-          <p>Invite link:</p>
-          <code>{inviteURL}</code>
-          <br />
-          <button onClick={handleCopy}>Copy link</button>
-          <button onClick={handleNavigate}>Create another form</button>
+        <div className="flex flex-col gap-6 p-4 border border-dashed rounded-md max-w-xl mx-auto">
+          <p>
+            <strong>Invite Link: </strong>
+            <code className="break-words">{inviteURL}</code>
+          </p>
+          <div className="flex gap-4 justify-center">
+            <button onClick={handleCopy}>Copy link</button>
+            <button onClick={handleNavigate}>Create another form</button>
+          </div>
         </div>
       )}
-
       {/* formId（公開） → 用來填寫 UI、分享 URL */}
       {/* adminToken（秘密） → 用於管理表單 */}
-    </>
+    </div>
   );
 };
 
