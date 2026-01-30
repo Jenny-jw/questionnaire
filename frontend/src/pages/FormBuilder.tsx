@@ -102,7 +102,7 @@ const FormBuilder = () => {
           placeholder="Title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="w-full"
+          className="w-full border border-gray-500 rounded-lg p-2"
         />
         <input
           id="description"
@@ -110,7 +110,7 @@ const FormBuilder = () => {
           placeholder="Description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full"
+          className="w-full border border-gray-500 rounded-lg p-2"
         />
         {/* Questions designed */}
         {fields.map((q) => (
@@ -155,31 +155,31 @@ const FormBuilder = () => {
 
         {/* Owner settings*/}
         <div className="w-full border border-gray-500 rounded-lg p-4">
-          <label className="flex items-center">
+          <label className="flex items-center p-2">
             <input
               type="checkbox"
               checked={requireLogin}
               onChange={(e) => setRequireLogin(e.target.checked)}
-              className="mr-2"
+              className="custom mr-2"
             />
             Fillers need to login
           </label>
-          <label className="flex items-center">
+          <label className="flex items-center p-2">
             <input
               type="checkbox"
               checked={allowAnonymous}
               onChange={(e) => setAllowAnonymous(e.target.checked)}
-              className="mr-2"
+              className="custom mr-2"
             />
             Filler can stay anonymous
           </label>
           <input
             id="owner"
             type="text"
-            placeholder="Owner name"
+            placeholder="Owner Name"
             value={owner}
             onChange={(e) => setOwner(e.target.value)}
-            className="w-full mt-2"
+            className="w-full p-2"
           />
           <input
             id="ownerEmail"
@@ -187,7 +187,7 @@ const FormBuilder = () => {
             placeholder="Owner Email"
             value={ownerEmail}
             onChange={(e) => setOwnerEmail(e.target.value)}
-            className="w-full mt-2"
+            className="w-full p-2"
           />
         </div>
 
