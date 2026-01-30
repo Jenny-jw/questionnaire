@@ -4,7 +4,7 @@ const Home = () => {
   const navigate = useNavigate();
   return (
     <>
-      <h1>Create your own forms~ 🪼</h1>
+      <h1>Create your own forms~ 🌿</h1>
       <br />
       <button
         onClick={() => {

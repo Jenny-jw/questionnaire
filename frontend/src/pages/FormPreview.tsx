@@ -40,7 +40,7 @@ const FormPreview = () => {
     <div className="max-w-xl mx-auto p-6">
       <h1 className="text-2xl font-semibold mb-2">{form.title}</h1>
       {form.description && (
-        <p className="text-gray-600 mb-6">{form.description}</p>
+        <p className="text-yellow-100 mb-6">{form.description}</p>
       )}
       <form className="flex flex-col gap-8 w-full">
         {form.fields.map((field) => (
